@@ -13,11 +13,38 @@ For this demo, we'll use the stock Spring Pet Clinic app from Github.
 
 This will run for a few seconds, then you will have your own copy of the Pet Clinic code in your Gogs repository!
 
+## Add a Jenkinsfile and Jar Name
+
+1. Clone the repo locally:
+```
+$ git clone <gogs url>
+```
+2. Edit `pom.xml` and add `<finalName>app</finalName>` inside the opening `<build>` tag.
+3. Add a the `Jenkinsfile` found in this repo uner `Jenkins/Jenkinsfile` to the *root* of the spring repository.
+4. Add/commit/push the changes.
+```
+$ git add --all
+$ git commit -m "Added Jenkinsfile and jar final name."
+$ git push origin master
+```
+
 ## Create the Pipeline Template
 
 Create a new template in your CI/CD project to create a new Jenkins build pipeline with a Java build.
 
 ```
-$ oc create -f 
+$ oc process -f https://raw.githubusercontent.com/pittar/aafc/master/ocp/build-template.yaml \
+    -p APP_NAME="petclinic" \
+    -p GIT_SOURCE_URL="http://gogs-cicd.192.168.64.2.nip.io/pittar/spring-petclinic.git" \
+    | oc create -f -
 ```
 
+## Start the Build
+
+You can use the command line:
+```
+$ oc start-build petclinic
+```
+
+Or manually through the UI:
+`Builds -> Pipelines -> Start Pipeline`

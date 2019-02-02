@@ -8,4 +8,4 @@ Install instructions for [CI/CD Tools](cicd-tools.md).
 
 ## Sample App and Pipeline
 
-Create a sample pipeline for a simple Java app.
+Create a sample [pipeline for a simple Java app](java-app-demo.md).
