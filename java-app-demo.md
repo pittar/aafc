@@ -19,8 +19,20 @@ This will run for a few seconds, then you will have your own copy of the Pet Cli
 ```
 $ git clone <gogs url>
 ```
-2. Edit `pom.xml` and add `<finalName>app</finalName>` inside the opening `<build>` tag.
-3. Add a the `Jenkinsfile` found in this repo uner `Jenkins/Jenkinsfile` to the *root* of the spring repository.
+2. Edit `pom.xml` and add the following XML after the opening `<build>` tag:
+```
+    <finalName>app</finalName>
+    <pluginManagement>
+        <plugins>
+            <plugin>
+                <groupId>org.sonarsource.scanner.maven</groupId>
+                <artifactId>sonar-maven-plugin</artifactId>
+                <version>3.6.0.1398</version>
+            </plugin>
+        </plugins>
+    </pluginManagement>
+```
+3. Add the `Jenkinsfile` found in this repo uner `Jenkins/Jenkinsfile` to the *root* of the spring repository.
 4. Add/commit/push the changes.
 ```
 $ git add --all
