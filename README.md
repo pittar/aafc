@@ -22,12 +22,16 @@ $ oc new-project cicd --display-name="CI/CD Environment" --description="CI/CD En
 
 SonaType Nexus [official OpenShift templates](https://github.com/sonatype-nexus-community/deployment-reference-architecture/tree/master/OpenShift)
 
+We'll use the version from OpenShiftDemos (works on Minishift).
+
 ```
 $ oc process -f \
-    https://raw.githubusercontent.com/sonatype-nexus-community/deployment-reference-architecture/master/OpenShift/nexus-repository-manager.yaml \
-    -p NEXUS_VERSION= "3.15.2" \
+    https://raw.githubusercontent.com/OpenShiftDemos/nexus/master/nexus3-persistent-template.yaml \
+    -p NEXUS_VERSION="3.15.2" \
     | oc create -f -
 ```
+
+Default admin username and password: `admin/admin123`
 
 ### SonarQube: Code Quality
 
@@ -39,10 +43,12 @@ SonarQube [OpenShift template](https://github.com/OpenShiftDemos/sonarqube-opens
 
 We'll use the template that includes a PostgreSQL database, instead of embedded H2.
 
+Default admin username and password: `admin/admin`
+
 ```
 $ oc process -f \
     https://raw.githubusercontent.com/OpenShiftDemos/sonarqube-openshift-docker/master/sonarqube-postgresql-template.yaml \
-    -p SONARQUBE_VERSION="7.0 \
+    -p SONARQUBE_VERSION="7.0" \
     | oc create -f -
 ```
 
@@ -59,5 +65,8 @@ We'll use the template that includes a PostgresSQL database to persist state acr
 $ oc process -f \
     https://raw.githubusercontent.com/OpenShiftDemos/gogs-openshift-docker/master/openshift/gogs-persistent-template.yaml \
     -p GOGS_VERSION="0.11.34" \
+    -p HOSTNAME="gogs.<cluster domain>" \
     | oc create -f -
 ```
+
+Default admin username and password:  First registered user is the admin.
