@@ -66,8 +66,19 @@ We'll use the template that includes a PostgresSQL database to persist state acr
 $ oc process -f \
     https://raw.githubusercontent.com/OpenShiftDemos/gogs-openshift-docker/master/openshift/gogs-persistent-template.yaml \
     -p GOGS_VERSION="0.11.34" \
-    -p HOSTNAME="gogs.<cluster domain>" \
+    -p HOSTNAME="gogs-cicd.<cluster url>" \
     | oc create -f -
 ```
 
 Default admin username and password:  First registered user is the admin.
+
+### Clean-up
+
+#### Deleting Gogs
+
+```
+$ oc delete all -l app=gogs
+$ oc delete cm cogs-config
+$ oc delete pvc -l app=gogs
+$ oc delete sa gogs
+```
