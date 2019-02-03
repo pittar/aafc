@@ -6,6 +6,7 @@ One potential set of tools to use in a DevSecOps pipeline for Java projects.
 
 1.  Download the [oc cli tool](https://github.com/openshift/origin/releases/tag/v3.11.0) for your OS and add it to your `PATH`
 2.  Connect to your OpenShift instance: `$ oc login -u <user> <cluster url>`
+    * (If using Minishift: `$oc login -u developer`)
 
 ## 1: DevSecOps Infrastructure
 
@@ -78,7 +79,7 @@ Default admin username and password:  First registered user is the admin.
 
 ```
 $ oc delete all -l app=gogs
-$ oc delete cm cogs-config
+$ oc delete cm -l app=gogs
 $ oc delete pvc -l app=gogs
-$ oc delete sa gogs
+$ oc delete sa -l app=gogs
 ```
