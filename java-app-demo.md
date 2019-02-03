@@ -33,6 +33,8 @@ $ git clone <gogs url>
     </pluginManagement>
 ```
 3. Add the `Jenkinsfile` found in this repo uner `Jenkins/Jenkinsfile` to the *root* of the spring repository.
+4. Login to SonarQube with user/pass `admin/admin` and generate a token (give it a name like `jenkins`).
+5. Copy/paste this token into your `Jenkinsfile` as the argument to the `-Dsonar.login` parameter.
 4. Add/commit/push the changes.
 ```
 $ git add --all
