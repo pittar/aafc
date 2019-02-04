@@ -49,7 +49,7 @@ Create a new template in your CI/CD project to create a new Jenkins build pipeli
 ```
 $ oc process -f https://raw.githubusercontent.com/pittar/aafc/master/ocp/build-template.yaml \
     -p APP_NAME="petclinic" \
-    -p GIT_SOURCE_URL="http://gogs-cicd.192.168.64.2.nip.io/pittar/spring-petclinic.git" \
+    -p GIT_SOURCE_URL="http://gogs-cicd.192.168.64.2.nip.io/pittar/petclinic.git" \
     | oc create -f -
 ```
 
