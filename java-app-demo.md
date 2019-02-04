@@ -62,3 +62,18 @@ $ oc start-build petclinic
 
 Or manually through the UI:
 `Builds -> Pipelines -> Start Pipeline`
+
+## Create DEV and TEST Environments
+
+Create two new projects:
+```
+$ oc new-project petclinic-dev --display-name="Petclinic DEV" --description="Petclinic DEV."
+$ oc policy add-role-to-user \
+    system:image-puller system:serviceaccount:petclinic-dev:default \
+    -n cicd
+
+$ oc new-project petclinic-test --display-name="Petclinic TEST" --description="Petclinic TEST."
+$ oc policy add-role-to-user \
+    system:image-puller system:serviceaccount:petclinic-uat:default \
+    -n cicd
+```

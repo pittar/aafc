@@ -75,6 +75,8 @@ Default admin username and password:  First registered user is the admin.
 
 ### Clean-up
 
+If you need to delete Gogs, but not the rest of the environment...
+
 #### Deleting Gogs
 
 ```
