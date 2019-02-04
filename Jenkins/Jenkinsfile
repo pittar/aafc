@@ -40,6 +40,7 @@ try {
     }
     node {
         stage("Deploy TEST") {
+            input "Deploy to TEST?"
             openshift.withCluster() {
                 openshift.withProject('petclinic-test') {
                     def dc = openshift.selector('dc', "${appName}")
