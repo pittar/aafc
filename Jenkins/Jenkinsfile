@@ -34,6 +34,8 @@ try {
                 openshift.withProject('cicd') {
                     openshift.tag("${appName}:latest", "${appName}:dev")
                 }
+            }
+            openshift.withCluster() {
                 openshift.withProject('petclinic-dev') {
                     def dc = openshift.selector('dc', "${appName}")
                     dc.rollout().status()
@@ -48,6 +50,8 @@ try {
                 openshift.withProject('cicd') {
                     openshift.tag("${appName}:dev", "${appName}:test")
                 }
+            }
+            openshift.withCluster() {
                 openshift.withProject('petclinic-test') {
                     def dc = openshift.selector('dc', "${appName}")
                     dc.rollout().status()
