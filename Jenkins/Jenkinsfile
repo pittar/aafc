@@ -28,6 +28,26 @@ try {
             sh "oc start-build ${appName}-build --from-file=target/app.jar -n ${project}"
         }
     }
+    node {
+        stage("Deploy DEV") {
+            openshift.withCluster() {
+                openshift.withProject('petclinic-dev') {
+                    def dc = openshift.selector('dc', "${appName}")
+                    dc.rollout().status()
+                }
+            }
+        }
+    }
+    node {
+        stage("Deploy TEST") {
+            openshift.withCluster() {
+                openshift.withProject('petclinic-test') {
+                    def dc = openshift.selector('dc', "${appName}")
+                    dc.rollout().status()
+                }
+            }
+        }
+    }
 } catch (err) {
     echo "in catch block"
     echo "Caught: ${err}"

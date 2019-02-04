@@ -71,9 +71,15 @@ $ oc new-project petclinic-dev --display-name="Petclinic DEV" --description="Pet
 $ oc policy add-role-to-user \
     system:image-puller system:serviceaccount:petclinic-dev:default \
     -n cicd
+$ oc policy add-role-to-user \
+    edit system:serviceaccount:cicd:jenkins \
+    -n petclinic-dev
 
 $ oc new-project petclinic-test --display-name="Petclinic TEST" --description="Petclinic TEST."
 $ oc policy add-role-to-user \
-    system:image-puller system:serviceaccount:petclinic-uat:default \
+    system:image-puller system:serviceaccount:petclinic-test:default \
     -n cicd
+$ oc policy add-role-to-user \
+    edit system:serviceaccount:cicd:jenkins \
+    -n petclinic-test
 ```
