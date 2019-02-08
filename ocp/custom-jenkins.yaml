@@ -1,0 +1,27 @@
+kind: List
+apiVersion: v1
+items:
+- kind: ImageStream
+  apiVersion: v1
+  metadata:
+    name: custom-jenkins
+- kind: BuildConfig
+  apiVersion: v1
+  metadata:
+    name: custom-jenkins-build
+  spec:
+    source:                       
+      git:
+        uri: https://github.com/pittar/custom-maven-jenkins
+      type: Git
+    strategy:                     
+      sourceStrategy:
+        from:
+          kind: ImageStreamTag
+          name: jenkins:latest
+          namespace: openshift
+      type: Source
+    output:                       
+      to:
+        kind: ImageStreamTag
+        name: custom-jenkins:latest
