@@ -1,87 +1,16 @@
 # CI/CD Tools Demo
 
-One potential set of tools to use in a DevSecOps pipeline for Java projects.
+Follow the instructions in [this CI/CD tools example](https://github.com/siamaksade/openshift-cd-demo) to setup a full CI/CD pipeline that includes:
+* Sonatype Nexus - Maven Proxy
+* Jenkins
+* SonarQube - Static Code Analysis
+* Gogs - Git Repository Manager
+* Eclipse Che (optional) - Web-based IDE running on OpenShift
+* [Quay.io](quay.io) (optional) - External docker registry that can scan images for vulnerabilities.
 
-## 0: Connect with OC CLI Tool
+This demo builds an application from source (from the Gogs repository), runs the unit tests, analyzis the code with SonarQube, then deploys the application to `dev` and `staging` environments.
 
-1.  Download the [oc cli tool](https://github.com/openshift/origin/releases/tag/v3.11.0) for your OS and add it to your `PATH`
-2.  Connect to your OpenShift instance: `$ oc login -u <user> <cluster url>`
-    * (If using Minishift: `$oc login -u developer`)
+The application that is deployed has a few built-in _features_, such as:
+* Generate load - can be used to demo autoscaling
+* Kill the application - watch OpenShift heal the app when it detects the container has crashed.
 
-## 1: DevSecOps Infrastructure
-
-The next few instructions will be to install the basic infra required for the pipeline.
-
-### CI/CD Project
-
-Create a new project for your CI/CD tools.
-```
-$ oc new-project cicd --display-name="CI/CD Environment" --description="CI/CD Environment."
-```
-
-### Nexus: Maven Repository
-
-SonaType Nexus [official OpenShift templates](https://github.com/sonatype-nexus-community/deployment-reference-architecture/tree/master/OpenShift)
-
-We'll use the version from OpenShiftDemos (works on Minishift).
-
-```
-$ oc process -f \
-    https://raw.githubusercontent.com/OpenShiftDemos/nexus/master/nexus3-persistent-template.yaml \
-    -p NEXUS_VERSION="3.15.2" \
-    -p MAX_MEMORY="2Gi" \
-    | oc create -f -
-```
-
-Default admin username and password: `admin/admin123`
-
-### SonarQube: Code Quality
-
-Read about SonarQube:
-* [Blog: Code Analysis with SonarQube](https://www.baeldung.com/sonar-qube)
-* [SonarQube: Official Docs](https://www.sonarqube.org/)
-
-SonarQube [OpenShift template](https://github.com/OpenShiftDemos/sonarqube-openshift-docker)
-
-We'll use the template that includes a PostgreSQL database, instead of embedded H2.
-
-Default admin username and password: `admin/admin`
-
-```
-$ oc process -f \
-    https://raw.githubusercontent.com/OpenShiftDemos/sonarqube-openshift-docker/master/sonarqube-postgresql-template.yaml \
-    -p SONARQUBE_VERSION="7.0" \
-    | oc create -f -
-```
-
-### Gogs: Git Repository manager
-
-Read about Gogs:
-* [Gogs home](https://gogs.io/)
-
-Gogs [OpenShift template](https://github.com/OpenShiftDemos/gogs-openshift-docker/tree/master/openshift)
-
-We'll use the template that includes a PostgresSQL database to persist state across restarts.
-
-```
-$ oc process -f \
-    https://raw.githubusercontent.com/OpenShiftDemos/gogs-openshift-docker/master/openshift/gogs-persistent-template.yaml \
-    -p GOGS_VERSION="0.11.34" \
-    -p HOSTNAME="gogs-cicd.<cluster url>" \
-    | oc create -f -
-```
-
-Default admin username and password:  First registered user is the admin.
-
-### Clean-up
-
-If you need to delete Gogs, but not the rest of the environment...
-
-#### Deleting Gogs
-
-```
-$ oc delete all -l app=gogs
-$ oc delete cm -l app=gogs
-$ oc delete pvc -l app=gogs
-$ oc delete sa -l app=gogs
-```
