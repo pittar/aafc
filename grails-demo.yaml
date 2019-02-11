@@ -8,9 +8,13 @@ https://github.com/grails-samples/music
 
 The Fabric8 Java s2i upstream image can build Grails/Gradle apps.
 
-oc new-app fabric8/s2i-java:3.0-java8~http://gogs-cicd-developer.192.168.64.2.nip.io/gogs/music
+To start a build, run the following command, substituting your gogs service if it is different.
 
-Create a route, grails/gradle app deployed.
+```
+$ oc new-app fabric8/s2i-java:3.0-java8~http://gogs:3000/gogs/music
+```
+
+When the app has deployed, create a route and you should be able to access your grails app.
 
 ## To Use Nexus
 
@@ -19,7 +23,7 @@ In your `gradle.build`, update the `maven` url to point to your instance of Nexu
 ```
     repositories {
         mavenLocal()
-        maven { url "http://nexus.cicd.svc:8081/repository/maven-public/" }
+        maven { url "http://nexus:8081/repository/maven-public/" }
     }
 ```
 
