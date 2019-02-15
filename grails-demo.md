@@ -1,20 +1,88 @@
 # Grails Demo
 
-## Migrate Grails app to Gogs
+## Gradle/Grails Demo App
 
-https://github.com/grails-samples/music
+For the demo, we'll use this simple app from GitHub.
+[https://github.com/grails-samples/music](https://github.com/grails-samples/music)
 
-## Build with Java s2i
+You can either migrate this repo into your Gogs instance, or you can just use the GitHub repo directly.
 
-The Fabric8 Java s2i upstream image can build Grails/Gradle apps.
+## Create a Gradle Jenkins Slave
 
-To start a build, run the following command, substituting your gogs service if it is different.
+ The [Red Hat Community of Practice](https://github.com/redhat-cop) Github org has you covered with this [Jenkins Gradle Slave](https://github.com/redhat-cop/containers-quickstarts/tree/master/jenkins-slaves/jenkins-slave-gradle).
+
+To build this slave in your OpenShift environment, simply run the following command in the project where your Jenkins master instance lives:
 
 ```
-$ oc new-app fabric8/s2i-java:3.0-java8~http://gogs:3000/gogs/music
+$ oc process -f https://raw.githubusercontent.com/redhat-cop/containers-quickstarts/master/jenkins-slaves/.openshift/templates/jenkins-slave-generic-template.yml \
+    -p NAME=jenkins-slave-gradle \
+    -p SOURCE_CONTEXT_DIR=jenkins-slaves/jenkins-slave-gradle \
+    | oc create -f -
 ```
 
-When the app has deployed, create a route and you should be able to access your grails app.
+Ok!  When that build completes, you will have a new [ImageStream](https://docs.okd.io/latest/architecture/core_concepts/builds_and_image_streams.html#image-streams) that is labeled with `role=jenkins-slave` so that Jenkins master will automatically be able to pick up and use this new agent type.
+
+*NOTE:* If Jenkins is already running, you will have to restart Jenkins for it to become aware of the new agent.
+
+## Add a Jenkinsfile
+
+Add a file named `Jenkinsfile` to the root of your repository with the the following contents:
+
+```
+try {
+    def appName=env.APP_NAME
+    def gitSourceUrl=env.GIT_SOURCE_URL
+    def gitSourceRef=env.GIT_SOURCE_REF
+    def project=""
+    node {
+        stage("Initialize") {
+            project = env.PROJECT_NAME
+            echo "appName: ${appName}"
+            echo "gitSourceUrl: ${gitSourceUrl}"
+            echo "gitSourceUrl: ${gitSourceUrl}"
+            echo "gitSourceRef: ${gitSourceRef}"
+        }
+    }
+    node("jenkins-slave-gradle") {
+        stage("Checkout") {
+            git url: "${gitSourceUrl}", branch: "${gitSourceRef}"
+        }
+        stage("Build JAR") {
+            sh "gradle build"
+            sh "cp build/libs/*.jar build/libs/app.jar"
+        }
+    }
+    node {
+        stage("Build Image") {
+            sh "oc start-build ${appName}-build --from-file=build/libs/app.jar -n ${project}"
+        }
+    }
+    node {
+        stage("Deploy DEV") {
+            openshift.withCluster() {
+                openshift.withProject('cicd') {
+                    openshift.tag("${appName}:latest", "${appName}:dev")
+                }
+            }
+        }
+    }
+    node {
+        stage("Deploy TEST") {
+            input "Deploy to TEST?"
+            openshift.withCluster() {
+                openshift.withProject('cicd') {
+                    openshift.tag("${appName}:dev", "${appName}:test")
+                }
+            }
+        }
+    }
+} catch (err) {
+    echo "in catch block"
+    echo "Caught: ${err}"
+    currentBuild.result = 'FAILURE'
+    throw err
+}
+```
 
 ## To Use Nexus
 
@@ -47,3 +115,15 @@ Now, add this repo to the `maven-public` repository group.
 5. Click `Save`
 
 You're build should now use your Maven proxy!
+
+## Alternative: Build with Java s2i
+
+The Fabric8 Java s2i upstream image can build Grails/Gradle apps.
+
+To start a build, run the following command, substituting your gogs service if it is different.
+
+```
+$ oc new-app fabric8/s2i-java:3.0-java8~http://gogs:3000/gogs/music
+```
+
+When the app has deployed, create a route and you should be able to access your grails app.
