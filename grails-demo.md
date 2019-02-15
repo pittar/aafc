@@ -80,11 +80,11 @@ try {
         }
     }
     node {
-        stage("Deploy TEST") {
-            input "Deploy to TEST?"
+        stage("Deploy STAGE") {
+            input "Deploy to STAGE?"
             openshift.withCluster() {
                 openshift.withProject("${project}") {
-                    openshift.tag("${appName}:dev", "${appName}:test")
+                    openshift.tag("${appName}:dev", "${appName}:stage")
                 }
             }
         }
