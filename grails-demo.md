@@ -47,6 +47,7 @@ try {
     node {
         stage("Initialize") {
             project = env.PROJECT_NAME
+            echo "project: ${project}"
             echo "appName: ${appName}"
             echo "gitSourceUrl: ${gitSourceUrl}"
             echo "gitSourceUrl: ${gitSourceUrl}"
@@ -60,17 +61,19 @@ try {
         stage("Build JAR") {
             sh "gradle build"
             sh "cp build/libs/*.jar build/libs/app.jar"
+            stash name:"jar", includes:"build/libs/app.jar"
         }
     }
     node {
         stage("Build Image") {
+            unstash name:"jar"
             sh "oc start-build ${appName}-build --from-file=build/libs/app.jar -n ${project}"
         }
     }
     node {
         stage("Deploy DEV") {
             openshift.withCluster() {
-                openshift.withProject('cicd') {
+                openshift.withProject("${project}") {
                     openshift.tag("${appName}:latest", "${appName}:dev")
                 }
             }
@@ -80,7 +83,7 @@ try {
         stage("Deploy TEST") {
             input "Deploy to TEST?"
             openshift.withCluster() {
-                openshift.withProject('cicd') {
+                openshift.withProject("${project}") {
                     openshift.tag("${appName}:dev", "${appName}:test")
                 }
             }
