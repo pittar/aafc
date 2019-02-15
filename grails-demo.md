@@ -16,6 +16,7 @@ To build this slave in your OpenShift environment, simply run the following comm
 ```
 $ oc process -f https://raw.githubusercontent.com/redhat-cop/containers-quickstarts/master/jenkins-slaves/.openshift/templates/jenkins-slave-generic-template.yml \
     -p NAME=jenkins-slave-gradle \
+    -p SLAVE_IMAGE_TAG=latest \
     -p SOURCE_CONTEXT_DIR=jenkins-slaves/jenkins-slave-gradle \
     | oc create -f -
 ```
@@ -23,6 +24,15 @@ $ oc process -f https://raw.githubusercontent.com/redhat-cop/containers-quicksta
 Ok!  When that build completes, you will have a new [ImageStream](https://docs.okd.io/latest/architecture/core_concepts/builds_and_image_streams.html#image-streams) that is labeled with `role=jenkins-slave` so that Jenkins master will automatically be able to pick up and use this new agent type.
 
 *NOTE:* If Jenkins is already running, you will have to restart Jenkins for it to become aware of the new agent.
+
+## Let DEV and STAGE Project Pull!
+
+This is different than the other example.  This time, all the images will remain in the `ci/cd` project.  The `dev` and `stage` projects will simply pull images from the `ci/cd` project.  To do this, these projects need permission!
+
+```
+$ oc adm policy add-role-to-user system:image-puller system:serviceaccount:dev-developer:default -n cicd-developer
+$ oc adm policy add-role-to-user system:image-puller system:serviceaccount:stage-developer:default -n cicd-developer
+```
 
 ## Add a Jenkinsfile
 
