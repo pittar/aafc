@@ -13,6 +13,11 @@ parameters:
   displayName: Container Name
   required: true
   value: petclinic
+- name: CICD_PROJECT
+  description: Name of CI/CD project.
+  displayName: CI/CD Project
+  required: true
+  value: cicd-developer
 - name: ENVIRONMENT
   description: Name of the environment (e.g. dev/uat/qa).
   displayName: Environment Name
@@ -80,13 +85,13 @@ objects:
     triggers:
     - type: ConfigChange
     - imageChangeParams:
-        automatic: false
+        automatic: true
         containerNames:
         - ${IMAGE_NAME}
         from:
           kind: ImageStreamTag
           name: ${IMAGE_NAME}:${ENVIRONMENT}
-          namespace: cicd
+          namespace: ${CICD_PROJECT}
       type: ImageChange
   status: {}
 - apiVersion: v1
