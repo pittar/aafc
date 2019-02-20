@@ -92,7 +92,7 @@ objects:
         openshift.io/imported-from: redis
       from:
         kind: DockerImage
-        name: docker.io/ckan/redis:latest
+        name: docker.io/redis:latest
       importPolicy: {}
       name: latest
       referencePolicy:
