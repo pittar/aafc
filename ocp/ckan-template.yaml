@@ -54,7 +54,7 @@ objects:
         openshift.io/imported-from: clementmouchet/datapusher
       from:
         kind: DockerImage
-        name: docker.io/ckan/datapusher:latest
+        name: docker.io/clementmouchet/datapusher:latest
       importPolicy: {}
       name: latest
       referencePolicy:
