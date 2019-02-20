@@ -57,6 +57,20 @@ Depending on the order that the containers finish pulling and starting, CKAN may
 
 The containers should be starting up in the background.
 
+### Create the Admin User
+
+Once the CKAN container has fully started, remote shell into the container to add an admin user.
+
+* Find the pod name for your ckan container: `$ oc get pods`
+* Connect to your ckan container by name, for example: `$ oc rsh ckan-1-aws3f`
+* Once connected, run the following command and follow the instructions:
+```
+$ cd /usr/bin
+$ ckan-paster --plugin=ckan sysadmin -c /etc/ckan/production.ini add admin
+```
+
+You should now be able to login with the account you just created.
+
 ### What Does This Create?
 
 * One `ImageStream` per image.
