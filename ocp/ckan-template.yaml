@@ -147,7 +147,7 @@ objects:
         - envFrom:
           - configMapRef:
               name: ckan
-          image: ckan/ckan
+          image: ckan
           imagePullPolicy: Always
           name: ckan
           ports:
@@ -203,7 +203,7 @@ objects:
           deploymentconfig: datapusher
       spec:
         containers:
-        - image: clementmouchet/datapusher
+        - image: datapusher
           imagePullPolicy: Always
           name: datapusher
           ports:
@@ -259,7 +259,7 @@ objects:
           deploymentconfig: postgresql
       spec:
         containers:
-        - image: ckan/postgresql
+        - image: postgresql
           imagePullPolicy: Always
           name: postgresql
           ports:
@@ -383,7 +383,7 @@ objects:
           deploymentconfig: solr
       spec:
         containers:
-        - image: ckan/solr
+        - image: solr
           imagePullPolicy: Always
           name: solr
           ports:
