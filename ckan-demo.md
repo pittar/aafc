@@ -6,11 +6,11 @@ Following these steps will get [CKAN](https://ckan.org/) up and running on OpenS
 
 However, there are a few trade-offs to ge this running:
 
-1.  You have to run the containers with a `service account` that has the `anyuid` scc.  This is something you normally wouldn't allow in a production environemnt.
+1.  You have to run the containers with a `service account` that has the `anyuid` scc.  This is something you normally wouldn't allow in a production environement.
 2.  The docker images don't seem to be well supported by CKAN.
 3.  This demo is ephemeral.  No volumes have been created or mounted.  Restarting the apps (or crash) will lose state/data.
 
-There Dockerfiles available for the main components, so it would be possible to create better (more secure) containers if running CKAN on OpenShift goes beyond a _proof of concept_ state.
+There are Dockerfiles available for the main components, so it would be possible to create better (more secure) containers if running CKAN on OpenShift goes beyond a _proof of concept_ state.
 
 Source documents:
 * [CKAN docs for docker compose](https://docs.ckan.org/en/2.8/maintaining/installing/install-from-docker-compose.html)
@@ -45,9 +45,9 @@ $ oc process -f \
     | oc create -f -
 ```
 
-Depending on the order that the containers finish pulling and starting, CKAN may fail to start.  If this happens, skale down the ckan pod, wait until the other pods have started, then scale it back up.
+Depending on the order that the containers finish pulling and starting, CKAN may fail to start.  If this happens, scale down the ckan pod, wait until the other pods have started, then scale it back up.
 
-### Instantiate the Template (UI)
+### Alternative to CLI:  Instantiate the Template (UI)
 
 * In your ckan project, click `Add to Project -> Import YAML/JSON`.
 * Copy/Paste the contents of [https://raw.githubusercontent.com/pittar/aafc/master/ocp/ckan-template.yaml](https://raw.githubusercontent.com/pittar/aafc/master/ocp/ckan-template.yaml) into the text box.
@@ -67,12 +67,12 @@ The containers should be starting up in the background.
 
 ### Clean-up
 
-The easy way is to simply *delete the project*
+The easy way is to simply *delete the project*.
 
-However, if you only want to delete the contents of the project (so that you don't hvae to re-create the `ckan` service account), run:
+However, if you only want to delete the contents of the project (so that you don't have to re-create the `ckan` service account), run:
 ```
 $ oc delete all,cm -l app=ckan
 ```
 
-This will delete all `ImageStreams`, `DeploymentConifgs`, `Pods', `Routes`, and `ConfigMaps` that have the `app=ckan` label attached to them. 
+This will delete all `ImageStreams`, `DeploymentConifgs`, `Pods`, `Routes`, and `ConfigMaps` that have the `app=ckan` label attached to them. 
 
