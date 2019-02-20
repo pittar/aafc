@@ -1,0 +1,518 @@
+apiVersion: v1
+kind: Template
+metadata:
+  name: ckan-template
+parameters:
+- name: CKAN_URL
+  description: Application URL
+  displayName: Application URL
+  required: true
+objects:
+- apiVersion: v1
+  kind: ConfigMap
+  metadata:
+    name: ckan
+  data:
+    CKAN_DATAPUSHER_URL: http://datapusher:8800/
+    CKAN_DATASTORE_READ_URL: postgresql://db:5432/datastore
+    CKAN_DATASTORE_WRITE_URL: postgresql://db:5432/datastore
+    CKAN_REDIS_URL: redis://redis:6379/1
+    CKAN_SITE_ID: default
+    CKAN_SITE_URL: http://${CKAN_URL}
+    CKAN_SOLR_URL: http://solr:8983/solr/ckan
+    CKAN_SQLALCHEMY_URL: postgresql://db:5432/datastore
+- apiVersion: image.openshift.io/v1
+  kind: ImageStream
+  metadata:
+    labels:
+      app: ckan
+    name: ckan
+  spec:
+    lookupPolicy:
+      local: false
+    tags:
+    - annotations:
+        openshift.io/imported-from: ckan/ckan
+      from:
+        kind: DockerImage
+        name: docker.io/ckan/ckan:latest
+      importPolicy: {}
+      name: latest
+      referencePolicy:
+        type: Source
+- apiVersion: image.openshift.io/v1
+  kind: ImageStream
+  metadata:
+    labels:
+      app: ckan
+    name: datapusher
+  spec:
+    lookupPolicy:
+      local: false
+    tags:
+    - annotations:
+        openshift.io/imported-from: clementmouchet/datapusher
+      from:
+        kind: DockerImage
+        name: docker.io/ckan/datapusher:latest
+      importPolicy: {}
+      name: latest
+      referencePolicy:
+        type: Source
+- apiVersion: image.openshift.io/v1
+  kind: ImageStream
+  metadata:
+    labels:
+      app: ckan
+    name: postgresql
+  spec:
+    lookupPolicy:
+      local: false
+    tags:
+    - annotations:
+        openshift.io/imported-from: ckan/postgresql
+      from:
+        kind: DockerImage
+        name: docker.io/ckan/postgresql:latest
+      importPolicy: {}
+      name: latest
+      referencePolicy:
+        type: Source
+- apiVersion: image.openshift.io/v1
+  kind: ImageStream
+  metadata:
+    labels:
+      app: ckan
+    name: redis
+  spec:
+    lookupPolicy:
+      local: false
+    tags:
+    - annotations:
+        openshift.io/imported-from: redis
+      from:
+        kind: DockerImage
+        name: docker.io/ckan/redis:latest
+      importPolicy: {}
+      name: latest
+      referencePolicy:
+        type: Source
+- apiVersion: image.openshift.io/v1
+  kind: ImageStream
+  metadata:
+    labels:
+      app: ckan
+    name: solr
+  spec:
+    lookupPolicy:
+      local: false
+    tags:
+    - annotations:
+        openshift.io/imported-from: ckan/solr
+      from:
+        kind: DockerImage
+        name: docker.io/ckan/solr:latest
+      importPolicy: {}
+      name: latest
+      referencePolicy:
+        type: Source
+- apiVersion: apps.openshift.io/v1
+  kind: DeploymentConfig
+  metadata:
+    labels:
+      app: ckan
+    name: ckan
+  spec:
+    replicas: 1
+    selector:
+      app: ckan
+      deploymentconfig: ckan
+    strategy:
+      activeDeadlineSeconds: 21600
+      resources: {}
+      rollingParams:
+        intervalSeconds: 1
+        maxSurge: 25%
+        maxUnavailable: 25%
+        timeoutSeconds: 600
+        updatePeriodSeconds: 1
+      type: Rolling
+    template:
+      metadata:
+        labels:
+          app: ckan
+          deploymentconfig: ckan
+      spec:
+        containers:
+        - envFrom:
+          - configMapRef:
+              name: ckan
+          image: ckan/ckan
+          imagePullPolicy: Always
+          name: ckan
+          ports:
+          - containerPort: 5000
+            protocol: TCP
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        serviceAccount: ckan
+        serviceAccountName: ckan
+        terminationGracePeriodSeconds: 30
+    test: false
+    triggers:
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+        - ckan
+        from:
+          kind: ImageStreamTag
+          name: ckan:latest
+          namespace: ckan
+      type: ImageChange
+    - type: ConfigChange
+- apiVersion: apps.openshift.io/v1
+  kind: DeploymentConfig
+  metadata:
+    labels:
+      app: ckan
+    name: datapusher
+  spec:
+    replicas: 1
+    selector:
+      app: ckan
+      deploymentconfig: datapusher
+    strategy:
+      activeDeadlineSeconds: 21600
+      resources: {}
+      rollingParams:
+        intervalSeconds: 1
+        maxSurge: 25%
+        maxUnavailable: 25%
+        timeoutSeconds: 600
+        updatePeriodSeconds: 1
+      type: Rolling
+    template:
+      metadata:
+        labels:
+          app: ckan
+          deploymentconfig: datapusher
+      spec:
+        containers:
+        - image: clementmouchet/datapusher
+          imagePullPolicy: Always
+          name: datapusher
+          ports:
+          - containerPort: 8800
+            protocol: TCP
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        serviceAccount: ckan
+        serviceAccountName: ckan
+        terminationGracePeriodSeconds: 30
+    test: false
+    triggers:
+    - type: ConfigChange
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+        - datapusher
+        from:
+          kind: ImageStreamTag
+          name: datapusher:latest
+          namespace: ckan
+      type: ImageChange
+- apiVersion: apps.openshift.io/v1
+  kind: DeploymentConfig
+  metadata:
+    labels:
+      app: ckan
+    name: postgresql
+  spec:
+    replicas: 1
+    selector:
+      app: ckan
+      deploymentconfig: postgresql
+    strategy:
+      activeDeadlineSeconds: 21600
+      resources: {}
+      rollingParams:
+        intervalSeconds: 1
+        maxSurge: 25%
+        maxUnavailable: 25%
+        timeoutSeconds: 600
+        updatePeriodSeconds: 1
+      type: Rolling
+    template:
+      metadata:
+        labels:
+          app: ckan
+          deploymentconfig: postgresql
+      spec:
+        containers:
+        - image: ckan/postgresql
+          imagePullPolicy: Always
+          name: postgresql
+          ports:
+          - containerPort: 5432
+            protocol: TCP
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          volumeMounts:
+          - mountPath: /var/lib/postgresql/data
+            name: postgresql-1
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        serviceAccount: ckan
+        serviceAccountName: ckan
+        terminationGracePeriodSeconds: 30
+        volumes:
+        - emptyDir: {}
+          name: postgresql-1
+    test: false
+    triggers:
+    - type: ConfigChange
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+        - postgresql
+        from:
+          kind: ImageStreamTag
+          name: postgresql:latest
+          namespace: ckan
+      type: ImageChange
+- apiVersion: apps.openshift.io/v1
+  kind: DeploymentConfig
+  metadata:
+    labels:
+      app: ckan
+    name: redis
+  spec:
+    replicas: 1
+    selector:
+      app: ckan
+      deploymentconfig: redis
+    strategy:
+      activeDeadlineSeconds: 21600
+      resources: {}
+      rollingParams:
+        intervalSeconds: 1
+        maxSurge: 25%
+        maxUnavailable: 25%
+        timeoutSeconds: 600
+        updatePeriodSeconds: 1
+      type: Rolling
+    template:
+      metadata:
+        labels:
+          app: ckan
+          deploymentconfig: redis
+      spec:
+        containers:
+        - image: redis
+          imagePullPolicy: Always
+          name: redis
+          ports:
+          - containerPort: 6379
+            protocol: TCP
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          volumeMounts:
+          - mountPath: /data
+            name: redis-1
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        serviceAccount: ckan
+        serviceAccountName: ckan
+        terminationGracePeriodSeconds: 30
+        volumes:
+        - emptyDir: {}
+          name: redis-1
+    test: false
+    triggers:
+    - type: ConfigChange
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+        - redis
+        from:
+          kind: ImageStreamTag
+          name: redis:latest
+          namespace: ckan
+      type: ImageChange
+- apiVersion: apps.openshift.io/v1
+  kind: DeploymentConfig
+  metadata:
+    labels:
+      app: ckan
+    name: solr
+  spec:
+    replicas: 1
+    selector:
+      app: ckan
+      deploymentconfig: solr
+    strategy:
+      activeDeadlineSeconds: 21600
+      resources: {}
+      rollingParams:
+        intervalSeconds: 1
+        maxSurge: 25%
+        maxUnavailable: 25%
+        timeoutSeconds: 600
+        updatePeriodSeconds: 1
+      type: Rolling
+    template:
+      metadata:
+        labels:
+          app: ckan
+          deploymentconfig: solr
+      spec:
+        containers:
+        - image: ckan/solr
+          imagePullPolicy: Always
+          name: solr
+          ports:
+          - containerPort: 8983
+            protocol: TCP
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        serviceAccount: ckan
+        serviceAccountName: ckan
+        terminationGracePeriodSeconds: 30
+    test: false
+    triggers:
+    - type: ConfigChange
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+        - solr
+        from:
+          kind: ImageStreamTag
+          name: solr:latest
+          namespace: ckan
+      type: ImageChange
+- apiVersion: v1
+  kind: Service
+  metadata:
+    labels:
+      app: ckan
+    name: ckan
+  spec:
+    ports:
+    - name: 5000-tcp
+      port: 5000
+      protocol: TCP
+      targetPort: 5000
+    selector:
+      deploymentconfig: ckan
+    sessionAffinity: None
+    type: ClusterIP
+  status:
+    loadBalancer: {}
+- apiVersion: v1
+  kind: Service
+  metadata:
+    labels:
+      app: ckan
+    name: datapusher
+  spec:
+    ports:
+    - name: 8800-tcp
+      port: 8800
+      protocol: TCP
+      targetPort: 8800
+    selector:
+      deploymentconfig: datapusher
+    sessionAffinity: None
+    type: ClusterIP
+  status:
+    loadBalancer: {}
+- apiVersion: v1
+  kind: Service
+  metadata:
+    labels:
+      app: ckan
+    name: db
+  spec:
+    ports:
+    - name: 5432-tcp
+      port: 5432
+      protocol: TCP
+      targetPort: 5432
+    selector:
+      deploymentconfig: postgresql
+    sessionAffinity: None
+    type: ClusterIP
+  status:
+    loadBalancer: {}
+- apiVersion: v1
+  kind: Service
+  metadata:
+    labels:
+      app: ckan
+    name: redis
+  spec:
+    ports:
+    - name: 6379-tcp
+      port: 6379
+      protocol: TCP
+      targetPort: 6379
+    selector:
+      deploymentconfig: redis
+    sessionAffinity: None
+    type: ClusterIP
+  status:
+    loadBalancer: {}
+- apiVersion: v1
+  kind: Service
+  metadata:
+    labels:
+      app: ckan
+    name: solr
+  spec:
+    ports:
+    - name: 8983-tcp
+      port: 8983
+      protocol: TCP
+      targetPort: 8983
+    selector:
+      deploymentconfig: solr
+    sessionAffinity: None
+    type: ClusterIP
+  status:
+    loadBalancer: {}
+- apiVersion: route.openshift.io/v1
+  kind: Route
+  metadata:
+    labels:
+      app: ckan
+    name: ckan
+  spec:
+    host: ${CKAN_URL}
+    port:
+      targetPort: 5000-tcp
+    to:
+      kind: Service
+      name: ckan
+      weight: 100
+    wildcardPolicy: None
