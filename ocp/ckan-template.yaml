@@ -172,7 +172,6 @@ objects:
         from:
           kind: ImageStreamTag
           name: ckan:latest
-          namespace: ckan
       type: ImageChange
     - type: ConfigChange
 - apiVersion: apps.openshift.io/v1
@@ -229,7 +228,6 @@ objects:
         from:
           kind: ImageStreamTag
           name: datapusher:latest
-          namespace: ckan
       type: ImageChange
 - apiVersion: apps.openshift.io/v1
   kind: DeploymentConfig
@@ -291,7 +289,6 @@ objects:
         from:
           kind: ImageStreamTag
           name: postgresql:latest
-          namespace: ckan
       type: ImageChange
 - apiVersion: apps.openshift.io/v1
   kind: DeploymentConfig
@@ -353,7 +350,6 @@ objects:
         from:
           kind: ImageStreamTag
           name: redis:latest
-          namespace: ckan
       type: ImageChange
 - apiVersion: apps.openshift.io/v1
   kind: DeploymentConfig
@@ -409,7 +405,6 @@ objects:
         from:
           kind: ImageStreamTag
           name: solr:latest
-          namespace: ckan
       type: ImageChange
 - apiVersion: v1
   kind: Service
