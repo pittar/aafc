@@ -2,7 +2,7 @@
 
 ## Background
 
-Following these steps will get [CKAN]() up and running on OpenShift based on the images they provide in [Docker Hub])().
+Following these steps will get [CKAN](https://ckan.org/) up and running on OpenShift based on the images they provide in [Docker Hub](https://hub.docker.com/u/ckan).
 
 However, there are a few trade-offs to ge this running:
 
