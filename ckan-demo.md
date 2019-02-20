@@ -29,11 +29,11 @@ $ oc new-project ckan
 
 Have your OpenShift Administrator login with their admin credentials and create a new `serviceaccount` with the `anyuid` scc.
 ```
-$ oc project ckan
+$ oc create sa ckan
 $ oc adm policy add-scc-to-user anyuid -z ckan
 ```
 
-This is required in order to run the CKAN contianers.
+This is required in order to run the CKAN contianers.  The rest of the instructions should be done as a normal user.
 
 ### Instantiate the Template (Command Line)
 
